@@ -3,8 +3,10 @@ project(JPSPlusGoalBounding)
 
 set(CMAKE_CXX_STANDARD 11)
 
+set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
+
 set(SOURCE_FILES
-#        main.cpp
         BucketPriorityQueue.cpp
         BucketPriorityQueue.h
         Cases.h
@@ -33,7 +35,14 @@ set(SOURCE_FILES
         stdafx.h
         targetver.h
         UnsortedPriorityQueue.cpp
-        UnsortedPriorityQueue.h)
+        UnsortedPriorityQueue.h
+        shell_game_jpsplus_JPSPlus.h
+        shell_game_jpsplus_JPSPlus.cpp
+#        shell_game_jpsplus_JPSPlusMain.cpp
+        MapFile.h
+        MapFile.cpp)
 
+include_directories(/System/Library/Frameworks/JavaVM.framework/Headers)
+
+add_library(JPSPlusGoalBounding SHARED ${SOURCE_FILES})
 #add_executable(JPSPlusGoalBounding ${SOURCE_FILES})
-add_library(JPSPlusGoalBounding ${SOURCE_FILES})

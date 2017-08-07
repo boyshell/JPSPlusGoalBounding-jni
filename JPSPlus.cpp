@@ -41,6 +41,7 @@
 #include "JPSPlus.h"
 #include<algorithm>
 #include<cstring>
+#include <stdlib.h>
 
 // Ideal choice of fixed-point equivalent to 1.0 that can almost perfectly represent sqrt(2) and (sqrt(2) - 1) in whole numbers
 // 1.000000000 = 2378
