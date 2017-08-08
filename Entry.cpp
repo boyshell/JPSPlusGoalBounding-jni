@@ -57,14 +57,17 @@ void PreprocessMap(std::vector<bool> &bits, int w, int h, const char *filename)
 	precomputeMap.SaveMap(filename);
 }
 
-void *PrepareForSearch(std::vector<bool> &bits, int w, int h, const char *filename)
+void *NewPrecomputeMap(std::vector<bool> &bits, int w, int h, const char *filename)
 {
-	//printf("Reading from file '%s'\n", filename);
+	PrecomputeMap *precomputeMap = new PrecomputeMap(w, h, bits);
+	precomputeMap->LoadMap(filename);
+	return (void*)precomputeMap;
+}
 
-	PrecomputeMap precomputeMap(w, h, bits);
-	precomputeMap.LoadMap(filename);
-	JumpDistancesAndGoalBounds** preprocessedMap = precomputeMap.GetPreprocessedMap();
-	return (void*)new JPSPlus(preprocessedMap, bits, w, h);
+void *PrepareForSearch(void *p)
+{
+	PrecomputeMap *precomputeMap = (PrecomputeMap *)p;
+	return (void*)new JPSPlus(precomputeMap->GetPreprocessedMap(), precomputeMap->m_map, precomputeMap->m_width, precomputeMap->m_height);
 }
 
 bool GetPath(void *data, xyLoc s, xyLoc g, std::vector<xyLoc> &path)

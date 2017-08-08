@@ -1,21 +1,21 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <cstdlib>
 #include <unordered_map>
 #include "shell_game_jpsplus_JPSPlus.h"
 #include "Entry.h"
 #include "MapFile.h"
+#include "JPSPlus.h"
 
-std::unordered_map<int, void*> pres;
+std::unordered_map<int, JPSPlus*> jps_map;
+std::unordered_map<int, PrecomputeMap*> pre_map;
 
 /*
  * Class:     shell_game_jpsplus_JPSPlus
  * Method:    save
  * Signature: ([ZIIILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_save
-    (JNIEnv *env, jobject, jbooleanArray blocks, jint width, jint height, jint id, jstring dir)
+JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_save(JNIEnv *env, jclass, jbooleanArray blocks, jint width, jint height, jint id, jstring dir)
 {
   const char *dir_name = env->GetStringUTFChars(dir, 0);
   std::string map_file_name(dir_name);
@@ -43,8 +43,7 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_save
  * Method:    load
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load
-    (JNIEnv *env, jobject, jint id, jstring dir)
+JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load(JNIEnv *env, jclass, jint id, jstring dir)
 {
   const char *dir_name = env->GetStringUTFChars(dir, 0);
   std::string map_file_name(dir_name);
@@ -53,23 +52,22 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load
 
   std::vector<bool> blocks;
   int width, height, version;
-  printf("load start...\n");
   LoadMap(map_file_name.c_str(), blocks, width, height, version);
 
-  printf("prepare start...\n");
-  void * pre = PrepareForSearch(blocks, width, height, pre_file_name.c_str());
-  if (pres.find(id) != pres.end()) { // 不允许重新加载
+  PrecomputeMap *p_pre = (PrecomputeMap *)NewPrecomputeMap(blocks, width, height, pre_file_name.c_str());
+  JPSPlus *p_jps = (JPSPlus *)PrepareForSearch(p_pre);
+  if (jps_map.find(id) != jps_map.end()) { // 不允许重新加载
     printf("ignore duplicate file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
-    delete(pre);
+    delete(p_jps);
+    delete(p_pre);
     return;
   }
   printf("load file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
-  pres[id] = pre;
+  jps_map[id] = p_jps;
+  pre_map[id] = p_pre;
 
   // release
   env->ReleaseStringUTFChars(dir, dir_name);
-
-  printf("done\n");
 }
 
 /*
@@ -77,11 +75,10 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load
  * Method:    find
  * Signature: (III)[I
  */
-JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find
-    (JNIEnv *env, jobject, jint id, jint src, jint dst)
+JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find(JNIEnv *env, jclass, jint id, jshort sx, jshort sy, jshort dx, jshort dy)
 {
-  std::unordered_map<int, void*>::iterator find = pres.find(id);
-  if (find == pres.end()) {
+  std::unordered_map<int, JPSPlus*>::iterator find = jps_map.find(id);
+  if (find == jps_map.end()) {
     printf("can not find %d\n", id);
     return NULL;
   }
@@ -90,20 +87,18 @@ JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find
     printf("%d is null, impossible!!!\n", id);
     return NULL;
   }
+  // TODO 多线程有问题啊。我曹，保存在类当中的
 
   std::vector<xyLoc> path;
   xyLoc s, g;
-  s.x = (src >> 16) & 0xffff;
-  s.y = src & 0xffff;
-  g.x = (dst >> 16) & 0xffff;
-  g.y = dst & 0xffff;
-//  printf("try find[%d,%d->%d,%d]\n", s.x, s.y, g.x, g.y);
+  s.x = sx;
+  s.y = sy;
+  g.x = dx;
+  g.y = dy;
   if (!GetPath(data, s, g, path)) {
-//    printf("!!!find->%d\n", path.size());
     jintArray newArray = env->NewIntArray(path.size());
     jint *narr = env->GetIntArrayElements(newArray, NULL);
     for (int i = 0; i < path.size(); ++i) {
-//      printf("find->%d,%d\n", path[i].x, path[i].y);
       int v = path[i].x;
       v = v << 16;
       narr[i] = v | path[i].y;
@@ -113,4 +108,20 @@ JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find
     return newArray;
   }
   return NULL;
+}
+
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    walkable
+ * Signature: (ISS)Z
+ */
+JNIEXPORT jboolean JNICALL Java_shell_game_jpsplus_JPSPlus_walkable(JNIEnv *env, jclass, jint id, jshort x, jshort y)
+{
+  std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
+  if (find == pre_map.end()) {
+    printf("can not find %d\n", id);
+    return false;
+  }
+
+  return !find->second->IsWall(x, y);
 }

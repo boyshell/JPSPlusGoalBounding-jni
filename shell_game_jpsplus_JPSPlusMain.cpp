@@ -5,10 +5,14 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <sys/time.h>
 #include "MapFile.h"
 #include "Entry.h"
+#include "PrecomputeMap.h"
+#include "JPSPlus.h"
 
-static std::unordered_map<int, void *> pres;
+std::unordered_map<int, JPSPlus*> jps_map;
+std::unordered_map<int, PrecomputeMap*> pre_map;
 
 void Java_shell_game_jpsplus_JPSPlus_save
     (std::vector<bool> &blocks, int width, int height, int id, std::string map_file_name) {
@@ -27,20 +31,19 @@ Java_shell_game_jpsplus_JPSPlus_load(int id, std::string map_file_name) {
 
   std::vector<bool> blocks;
   int width, height, version;
-  printf("load start...\n");
   LoadMap(map_file_name.c_str(), blocks, width, height, version);
 
-  printf("prepare start...\n");
-  void *pre = PrepareForSearch(blocks, width, height, pre_file_name.c_str());
-  if (pres.find(id) != pres.end()) { // 不允许重新加载
+  PrecomputeMap *p_pre = (PrecomputeMap *)NewPrecomputeMap(blocks, width, height, pre_file_name.c_str());
+  JPSPlus *p_jps = (JPSPlus *)PrepareForSearch(p_pre);
+  if (jps_map.find(id) != jps_map.end()) { // 不允许重新加载
     printf("ignore duplicate file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
-    delete (pre);
+    delete(p_jps);
+    delete(p_pre);
     return;
   }
   printf("load file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
-  pres[id] = pre;
-
-  printf("done\n");
+  jps_map[id] = p_jps;
+  pre_map[id] = p_pre;
 }
 
 /*
@@ -48,29 +51,47 @@ Java_shell_game_jpsplus_JPSPlus_load(int id, std::string map_file_name) {
  * Method:    find
  * Signature: (III)[I
  */
-void Java_shell_game_jpsplus_JPSPlus_find(int id, int src, int dst) {
-  std::unordered_map<int, void *>::iterator find = pres.find(id);
-  if (find == pres.end()) {
+void Java_shell_game_jpsplus_JPSPlus_find(int id, short sx, short sy, short dx, short dy) {
+  std::unordered_map<int, JPSPlus*>::iterator find = jps_map.find(id);
+  if (find == jps_map.end()) {
     printf("can not find %d\n", id);
-    return;
+    return ;
   }
-  void *data = find->second;
+  void* data = find->second;
   if (data == NULL) {
     printf("%d is null, impossible!!!\n", id);
-    return;
+    return ;
   }
 
   std::vector<xyLoc> path;
   xyLoc s, g;
-  s.x = (src >> 16) & 0xffff;
-  s.y = src & 0xffff;
-  g.x = (dst >> 16) & 0xffff;
-  g.y = dst & 0xffff;
-  if (GetPath(data, s, g, path)) {
+  s.x = sx;
+  s.y = sy;
+  g.x = dx;
+  g.y = dy;
+  if (!GetPath(data, s, g, path)) {
     for (int i = 0; i < path.size(); ++i) {
       printf("%d,%d\n", path[i].x, path[i].y);
     }
   }
+}
+
+long now_millis() {
+  struct timeval tp;
+  gettimeofday(&tp, NULL);
+  return tp.tv_sec * 1000000 + tp.tv_usec;
+}
+
+bool Java_shell_game_jpsplus_JPSPlus_walkable(int id, short x, short y)
+{
+  std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
+  if (find == pre_map.end()) {
+    printf("can not find %d\n", id);
+    return false;
+  }
+
+  // TODO 多线程有问题啊。我曹，保存在类当中的
+  return !find->second->IsWall(x, y);
 }
 
 int main(int argc, char **argv) {
@@ -87,7 +108,18 @@ int main(int argc, char **argv) {
   Java_shell_game_jpsplus_JPSPlus_save(blocks, width, height, id, dir.c_str());
   Java_shell_game_jpsplus_JPSPlus_load(id, dir.c_str());
 
-  int src = (50 << 16) | 50;
-  int dst = (99 << 16) | 99;
-  Java_shell_game_jpsplus_JPSPlus_find(id, src, dst);
+  long s = now_millis();
+//  for (int i = 0; i < 1000000; ++i) {
+//    Java_shell_game_jpsplus_JPSPlus_find(id, 0, 0, 99, 99);
+//  }
+  s = now_millis() - s;
+  printf("cost %ld us\n", s);
+
+  for (short y = 0; y < height; ++y) {
+    for (short x = 0; x < width; ++x) {
+      if (!Java_shell_game_jpsplus_JPSPlus_walkable(id, x, y)) {
+        printf("fuck!!!!");
+      }
+    }
+  }
 }

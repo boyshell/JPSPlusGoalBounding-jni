@@ -1,6 +1,7 @@
 //
 // Created by 张祥熙 on 17/8/7.
 //
+#include <cstdio>
 #include "MapFile.h"
 
 const char TRUE = '.';
@@ -12,7 +13,6 @@ void LoadMap(const char *fname, std::vector<bool> &map, int &width, int &height,
   if (f) {
     fscanf(f, "version:%d\nheight:%d\nwidth:%d\n", &version, &height, &width);
     map.resize(height * width);
-    printf("resize");
     for (int y = 0; y < height; y++) {
       for (int x = 0; x < width; x++) {
         char c;

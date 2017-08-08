@@ -13,7 +13,7 @@ extern "C" {
  * Signature: ([ZIIILjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_save
-  (JNIEnv *, jobject, jbooleanArray, jint, jint, jint, jstring);
+  (JNIEnv *, jclass, jbooleanArray, jint, jint, jint, jstring);
 
 /*
  * Class:     shell_game_jpsplus_JPSPlus
@@ -21,15 +21,23 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_save
  * Signature: (ILjava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load
-  (JNIEnv *, jobject, jint, jstring);
+  (JNIEnv *, jclass, jint, jstring);
 
 /*
  * Class:     shell_game_jpsplus_JPSPlus
  * Method:    find
- * Signature: (III)[I
+ * Signature: (ISSSS)[I
  */
 JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find
-  (JNIEnv *, jobject, jint, jint, jint);
+  (JNIEnv *, jclass, jint, jshort, jshort, jshort, jshort);
+
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    walkable
+ * Signature: (ISS)Z
+ */
+JNIEXPORT jboolean JNICALL Java_shell_game_jpsplus_JPSPlus_walkable
+  (JNIEnv *, jclass, jint, jshort, jshort);
 
 #ifdef __cplusplus
 }

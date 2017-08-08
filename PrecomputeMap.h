@@ -84,17 +84,19 @@ public:
 	PrecomputeMap(int width, int height, std::vector<bool> map);
 	~PrecomputeMap();
 
+	int m_width;
+	int m_height;
+	std::vector<bool> m_map;
+
 	DistantJumpPoints** CalculateMap();
 	void SaveMap(const char *filename);
 	void LoadMap(const char *filename);
 	JumpDistancesAndGoalBounds** GetPreprocessedMap() { return m_jumpDistancesAndGoalBoundsMap; }
 	void ReleaseMap() { if (m_mapCreated) DestroyArray(m_distantJumpPointMap); }
+	bool IsWall(int r, int c);
 
 protected:
 	bool m_mapCreated;
-	int m_width;
-	int m_height;
-	std::vector<bool> m_map;
 	unsigned char** m_jumpPointMap;
 	DistantJumpPoints** m_distantJumpPointMap;
 	GoalBounds** m_goalBoundsMap;
@@ -108,7 +110,6 @@ protected:
 	void CalculateGoalBounding();
 	bool IsJumpPoint(int r, int c, int rowDir, int colDir);
 	bool IsEmpty(int r, int c);
-	bool IsWall(int r, int c);
 
 	enum BitfieldDirections
 	{
