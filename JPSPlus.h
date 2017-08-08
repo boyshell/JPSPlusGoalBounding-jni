@@ -63,7 +63,7 @@ enum PathStatus
 class JPSPlus
 {
 public:
-	JPSPlus(JumpDistancesAndGoalBounds** jumpDistancesAndGoalBoundsMap, std::vector<bool> &rawMap, int w, int h);
+	JPSPlus(JumpDistancesAndGoalBounds** jumpDistancesAndGoalBoundsMap, int w, int h);
 	~JPSPlus();
 
 	bool GetPath(xyLocJPS& s, xyLocJPS& g, std::vector<xyLocJPS> &path);

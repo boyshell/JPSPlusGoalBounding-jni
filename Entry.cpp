@@ -67,7 +67,7 @@ void *NewPrecomputeMap(std::vector<bool> &bits, int w, int h, const char *filena
 void *PrepareForSearch(void *p)
 {
 	PrecomputeMap *precomputeMap = (PrecomputeMap *)p;
-	return (void*)new JPSPlus(precomputeMap->GetPreprocessedMap(), precomputeMap->m_map, precomputeMap->m_width, precomputeMap->m_height);
+	return (void*)new JPSPlus(precomputeMap->GetPreprocessedMap(), precomputeMap->m_width, precomputeMap->m_height);
 }
 
 bool GetPath(void *data, xyLoc s, xyLoc g, std::vector<xyLoc> &path)

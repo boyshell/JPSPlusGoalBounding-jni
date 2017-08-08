@@ -7,7 +7,7 @@
 #include "MapFile.h"
 #include "JPSPlus.h"
 
-std::unordered_map<int, JPSPlus*> jps_map;
+thread_local std::unordered_map<int, JPSPlus*> jps_map;
 std::unordered_map<int, PrecomputeMap*> pre_map;
 
 /*
@@ -55,19 +55,38 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load(JNIEnv *env, jclass,
   LoadMap(map_file_name.c_str(), blocks, width, height, version);
 
   PrecomputeMap *p_pre = (PrecomputeMap *)NewPrecomputeMap(blocks, width, height, pre_file_name.c_str());
-  JPSPlus *p_jps = (JPSPlus *)PrepareForSearch(p_pre);
-  if (jps_map.find(id) != jps_map.end()) { // 不允许重新加载
+  if (pre_map.find(id) != pre_map.end()) { // 不允许重新加载
     printf("ignore duplicate file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
-    delete(p_jps);
     delete(p_pre);
     return;
   }
   printf("load file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
-  jps_map[id] = p_jps;
   pre_map[id] = p_pre;
 
   // release
   env->ReleaseStringUTFChars(dir, dir_name);
+}
+
+JPSPlus* getOrCreate(int id)
+{
+  std::unordered_map<int, JPSPlus*>::iterator jps_find = jps_map.find(id);
+  if (jps_find != jps_map.end()) {
+    return jps_find->second;
+  }
+
+  std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
+  if (find == pre_map.end()) {
+    printf("can not find %d\n", id);
+    return NULL;
+  }
+  void* p_pre = find->second;
+  if (p_pre == NULL) {
+    printf("%d is null, impossible!!!\n", id);
+    return NULL;
+  }
+  JPSPlus *p_jps = (JPSPlus *)PrepareForSearch(p_pre);
+  jps_map[id] = p_jps;
+  return p_jps;
 }
 
 /*
@@ -77,17 +96,10 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load(JNIEnv *env, jclass,
  */
 JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find(JNIEnv *env, jclass, jint id, jshort sx, jshort sy, jshort dx, jshort dy)
 {
-  std::unordered_map<int, JPSPlus*>::iterator find = jps_map.find(id);
-  if (find == jps_map.end()) {
-    printf("can not find %d\n", id);
+  JPSPlus *p_jps = getOrCreate(id);
+  if (p_jps == NULL) {
     return NULL;
   }
-  void* data = find->second;
-  if (data == NULL) {
-    printf("%d is null, impossible!!!\n", id);
-    return NULL;
-  }
-  // TODO 多线程有问题啊。我曹，保存在类当中的
 
   std::vector<xyLoc> path;
   xyLoc s, g;
@@ -95,16 +107,16 @@ JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find(JNIEnv *env, jc
   s.y = sy;
   g.x = dx;
   g.y = dy;
-  if (!GetPath(data, s, g, path)) {
+  if (!GetPath(p_jps, s, g, path)) {
     jintArray newArray = env->NewIntArray(path.size());
-    jint *narr = env->GetIntArrayElements(newArray, NULL);
+    jint *narr = env->GetIntArrayElements(newArray, 0);
     for (int i = 0; i < path.size(); ++i) {
       int v = path[i].x;
       v = v << 16;
       narr[i] = v | path[i].y;
     }
 
-    env->ReleaseIntArrayElements(newArray, narr, NULL);
+    env->ReleaseIntArrayElements(newArray, narr, 0);
     return newArray;
   }
   return NULL;

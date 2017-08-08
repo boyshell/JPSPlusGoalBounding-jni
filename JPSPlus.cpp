@@ -56,7 +56,7 @@
 
 typedef const void (JPSPlus::*FunctionPointer)(PathfindingNode * currentNode, JumpDistancesAndGoalBounds * map);
 
-JPSPlus::JPSPlus(JumpDistancesAndGoalBounds** jumpDistancesAndGoalBoundsMap, std::vector<bool> &rawMap, int w, int h)
+JPSPlus::JPSPlus(JumpDistancesAndGoalBounds** jumpDistancesAndGoalBoundsMap, int w, int h)
 {
 	// Map properties
 	m_width = w;
@@ -88,7 +88,7 @@ JPSPlus::~JPSPlus()
 {
 	delete m_fastStack;
 	delete m_simpleUnsortedPriorityQueue;
-	DestroyArray(m_jumpDistancesAndGoalBounds);
+//	DestroyArray(m_jumpDistancesAndGoalBounds); 上层释放
 	DestroyArray(m_mapNodes);
 }
 
