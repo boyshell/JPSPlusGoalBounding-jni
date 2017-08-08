@@ -157,3 +157,33 @@ JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_version(JNIEnv *, jclass,
   }
   return find->second;
 }
+
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    width
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_width(JNIEnv *, jclass, jint id)
+{
+  std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
+  if (find == pre_map.end()) {
+    printf("can not find %d\n", id);
+    return -1;
+  }
+  return find->second->m_width;
+}
+
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    height
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_height(JNIEnv *, jclass, jint id)
+{
+  std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
+  if (find == pre_map.end()) {
+    printf("can not find %d\n", id);
+    return -1;
+  }
+  return find->second->m_height;
+}

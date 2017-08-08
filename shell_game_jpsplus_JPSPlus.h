@@ -47,6 +47,22 @@ JNIEXPORT jboolean JNICALL Java_shell_game_jpsplus_JPSPlus_walkable
 JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_version
   (JNIEnv *, jclass, jint);
 
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    width
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_width
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    height
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_height
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif
