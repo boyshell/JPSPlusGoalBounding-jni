@@ -39,6 +39,14 @@ JNIEXPORT jintArray JNICALL Java_shell_game_jpsplus_JPSPlus_find
 JNIEXPORT jboolean JNICALL Java_shell_game_jpsplus_JPSPlus_walkable
   (JNIEnv *, jclass, jint, jshort, jshort);
 
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    version
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_version
+  (JNIEnv *, jclass, jint);
+
 #ifdef __cplusplus
 }
 #endif

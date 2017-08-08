@@ -46,5 +46,7 @@ include_directories(/System/Library/Frameworks/JavaVM.framework/Headers
         /home/zhangxiangxi/bin/jdk1.8.0_131/include/linux
         /home/zhangxiangxi/bin/jdk1.8.0_131/include)
 
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+
 add_library(JPSPlusGoalBounding SHARED ${SOURCE_FILES})
 #add_executable(JPSPlusGoalBounding ${SOURCE_FILES})

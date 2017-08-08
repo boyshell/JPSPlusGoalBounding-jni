@@ -9,6 +9,11 @@
 
 thread_local std::unordered_map<int, JPSPlus*> jps_map;
 std::unordered_map<int, PrecomputeMap*> pre_map;
+std::unordered_map<int, int> ver_map;
+
+#ifndef NULL_VERSION_FOR_JPS_PLUS
+#define NULL_VERSION_FOR_JPS_PLUS 0xffffffff
+#endif
 
 /*
  * Class:     shell_game_jpsplus_JPSPlus
@@ -29,7 +34,7 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_save(JNIEnv *env, jclass,
     blocks1[i] = blocks0[i];
   }
 
-  int version = 0xffffffff;
+  int version = NULL_VERSION_FOR_JPS_PLUS;
   SaveMap(map_file_name.c_str(), blocks1, width, height, version);
   PreprocessMap(blocks1, width, height, pre_file_name.c_str());
 
@@ -62,6 +67,7 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load(JNIEnv *env, jclass,
   }
   printf("load file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
   pre_map[id] = p_pre;
+  ver_map[id] = version;
 
   // release
   env->ReleaseStringUTFChars(dir, dir_name);
@@ -136,4 +142,18 @@ JNIEXPORT jboolean JNICALL Java_shell_game_jpsplus_JPSPlus_walkable(JNIEnv *env,
   }
 
   return !find->second->IsWall(x, y);
+}
+
+/*
+ * Class:     shell_game_jpsplus_JPSPlus
+ * Method:    version
+ * Signature: (I)I
+ */
+JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_version(JNIEnv *, jclass, jint id)
+{
+  std::unordered_map<int, int>::iterator find = ver_map.find(id);
+  if (find == ver_map.end()) {
+    return NULL_VERSION_FOR_JPS_PLUS;
+  }
+  return find->second;
 }
