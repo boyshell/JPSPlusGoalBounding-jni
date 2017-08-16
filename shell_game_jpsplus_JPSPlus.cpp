@@ -61,11 +61,11 @@ JNIEXPORT void JNICALL Java_shell_game_jpsplus_JPSPlus_load(JNIEnv *env, jclass,
 
   PrecomputeMap *p_pre = (PrecomputeMap *)NewPrecomputeMap(blocks, width, height, pre_file_name.c_str());
   if (pre_map.find(id) != pre_map.end()) { // 不允许重新加载
-    printf("ignore duplicate file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
+    fprintf(stderr, "ignore duplicate file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
     delete(p_pre);
     return;
   }
-  printf("load file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
+  fprintf(stderr, "load file[id:%d,width:%d,height:%d,version:%d]\n", id, width, height, version);
   pre_map[id] = p_pre;
   ver_map[id] = version;
 
@@ -82,12 +82,12 @@ JPSPlus* getOrCreate(int id)
 
   std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
   if (find == pre_map.end()) {
-    printf("can not find %d\n", id);
+    fprintf(stderr, "can not find %d\n", id);
     return NULL;
   }
   void* p_pre = find->second;
   if (p_pre == NULL) {
-    printf("%d is null, impossible!!!\n", id);
+    fprintf(stderr, "%d is null, impossible!!!\n", id);
     return NULL;
   }
   JPSPlus *p_jps = (JPSPlus *)PrepareForSearch(p_pre);
@@ -137,7 +137,7 @@ JNIEXPORT jboolean JNICALL Java_shell_game_jpsplus_JPSPlus_walkable(JNIEnv *env,
 {
   std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
   if (find == pre_map.end()) {
-    printf("can not find %d\n", id);
+    fprintf(stderr, "can not find %d\n", id);
     return false;
   }
 
@@ -167,7 +167,7 @@ JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_width(JNIEnv *, jclass, j
 {
   std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
   if (find == pre_map.end()) {
-    printf("can not find %d\n", id);
+    fprintf(stderr, "can not find %d\n", id);
     return -1;
   }
   return find->second->m_width;
@@ -182,7 +182,7 @@ JNIEXPORT jint JNICALL Java_shell_game_jpsplus_JPSPlus_height(JNIEnv *, jclass, 
 {
   std::unordered_map<int, PrecomputeMap*>::iterator find = pre_map.find(id);
   if (find == pre_map.end()) {
-    printf("can not find %d\n", id);
+    fprintf(stderr, "can not find %d\n", id);
     return -1;
   }
   return find->second->m_height;
