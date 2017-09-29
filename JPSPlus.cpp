@@ -126,6 +126,14 @@ bool JPSPlus::GetPath(xyLocJPS& s, xyLocJPS& g, std::vector<xyLocJPS> &path)
 	m_goalRow = g.y;
 	m_goalCol = g.x;
 
+  if (m_goalCol < 0 || m_goalRow < 0 || startRow < 0 || startCol < 0) {
+    return true;
+  }
+
+  if (m_goalRow >= m_height || m_goalCol >= m_width || startRow >= m_height || startCol >= m_width) {
+    return true;
+  }
+
 	{
 		// Initialize map
 		path.clear();
