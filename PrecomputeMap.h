@@ -93,7 +93,19 @@ public:
 	void LoadMap(const char *filename);
 	JumpDistancesAndGoalBounds** GetPreprocessedMap() { return m_jumpDistancesAndGoalBoundsMap; }
 	void ReleaseMap() { if (m_mapCreated) DestroyArray(m_distantJumpPointMap); }
-	bool IsWall(int r, int c);
+	bool IsWall(int r, int c)
+	{
+		unsigned int colBoundsCheck = c;
+		unsigned int rowBoundsCheck = r;
+		if (colBoundsCheck < (unsigned int)m_width && rowBoundsCheck < (unsigned int)m_height)
+		{
+			return !m_map[c + (r * m_width)];
+		}
+		else
+		{
+			return true;
+		}
+	}
 
 protected:
 	bool m_mapCreated;

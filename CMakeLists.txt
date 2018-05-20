@@ -4,7 +4,7 @@ project(JPSPlusGoalBounding)
 set(CMAKE_CXX_STANDARD 11)
 
 set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Debug)
 
 set(SOURCE_FILES
         BucketPriorityQueue.cpp
@@ -42,11 +42,8 @@ set(SOURCE_FILES
         MapFile.h
         MapFile.cpp)
 
-include_directories(/System/Library/Frameworks/JavaVM.framework/Headers
-        /home/zhangxiangxi/bin/jdk1.8.0_131/include/linux
-        /home/zhangxiangxi/bin/jdk1.8.0_131/include)
-
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+find_package(JNI)
+include_directories(${JNI_INCLUDE_DIRS})
 
 add_library(JPSPlusGoalBounding SHARED ${SOURCE_FILES})
 #add_executable(JPSPlusGoalBounding ${SOURCE_FILES})

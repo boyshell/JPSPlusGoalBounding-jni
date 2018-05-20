@@ -326,20 +326,6 @@ inline bool PrecomputeMap::IsEmpty(int r, int c)
 	}
 }
 
-inline bool PrecomputeMap::IsWall(int r, int c)
-{
-	unsigned int colBoundsCheck = c;
-	unsigned int rowBoundsCheck = r;
-	if (colBoundsCheck < (unsigned int)m_width && rowBoundsCheck < (unsigned int)m_height)
-	{
-		return !m_map[c + (r * m_width)];
-	}
-	else
-	{
-		return true;
-	}
-}
-
 void PrecomputeMap::CalculateDistantJumpPointMap()
 {
 	// Calculate distant jump points (Left and Right)
